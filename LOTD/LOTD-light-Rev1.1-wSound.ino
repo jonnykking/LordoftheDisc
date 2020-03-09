@@ -1,48 +1,47 @@
 #include <Adafruit_NeoPixel.h>
-
-#define PIN 0
-#define BUTTON 2
-#define PIN 4
+#define PIN 0              //Neopixel Signal
+#define BUTTON 2           //Vibration Sensor
+#define PIN 4              //Sound Module
 
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(100, PIN);
 
-int play=4; //play duration
+int play=4;                //play duration
+long RanColor = 0;
 
-uint8_t  mode   = 0,   // Current animation effect
-         offset = 0;   // Position of spinny eyes
-uint32_t color  = 0x00ff96;    //Start red
+uint8_t  mode   = 0,           // Current animation effect
+offset = 0;                    // Position of spinny eyes
+uint32_t color  = 0x00ff96;    // Start red - Doesnt seem to be used
 uint32_t prevTime;
 uint32_t randomColor;
-long RanColor = 0;
 uint32_t ColorOff;
 
-void setup() {
+
+void setup() {  
+  pinMode(play,OUTPUT);             // sound output
+  digitalWrite(play,LOW);           // Set sound signal to not play
   
-  pinMode(play,OUTPUT); // sound output
-  digitalWrite(play,LOW);
-  
-  randomSeed(analogRead(7));
+  randomSeed(analogRead(7));        //Random seed to generate 'real' random numbers
   pixels.begin();
 
   mode = 1;
-  pixels.setBrightness(90);   // 1/3 brightness
+  pixels.setBrightness(90);         // 1/3 brightness
   prevTime = millis();
-  pinMode(2, INPUT_PULLUP);   // internal pull-up resistor
+  pinMode(2, INPUT_PULLUP);         // internal pull-up resistor
   attachInterrupt (digitalPinToInterrupt (BUTTON), changeEffect, CHANGE);   // pressed
 }
 
 void changeEffect() {
   if (digitalRead (BUTTON) == LOW) {
     mode = 0;
-    gobblegobble();
+    gobblegobble();                 // activate sound
   }
 }
 
 
-void gobblegobble() {
-  digitalWrite(play,HIGH); //soundtest
-delay(50);
-  digitalWrite(play,LOW);  //soundtest
+void gobblegobble() {               //Sound void
+  digitalWrite(play,HIGH);          //Send sound signal
+  delay(50);
+  digitalWrite(play,LOW);           //Stop sound signal
   break;
   }
 
@@ -54,15 +53,15 @@ void loop() {
 
   switch (mode) {
 
-    case 0:   // Random sparks - just one LED on at a time!
-      RanColor = random(48);   // # of cases +1
-      randomColor = RanColor;   // Set color from random number
+    case 0:                         // Random sparks - just one LED on at a time!
+      RanColor = random(48);        // # of colour cases +1
+      randomColor = RanColor;       // Set colour from random number
 
 /// why this not work??
-       ColorOff = pixels.Color(0, 0, 0);
+        ColorOff = pixels.Color(0, 0, 0);
         pixels.setPixelColor(   i, ColorOff);   // First eye
-        pixels.setPixelColor(70 - i, ColorOff);
-              pixels.show();
+        pixels.setPixelColor(70 - i, ColorOff); // Second eye (flipped)
+        pixels.show();
 /// bah!
               
       switch (RanColor) {
@@ -114,7 +113,7 @@ void loop() {
         case 45 : randomColor = pixels.Color(138, 43, 226); break; //blue violet
         case 46 : randomColor = pixels.Color(75, 0, 130); break; //indigo
         case 47 : randomColor = pixels.Color(72, 61, 139); break; //dark slate blue
-      }
+                           }
 
       i = random(100);
       
@@ -130,12 +129,12 @@ void loop() {
         if (((offset + i) & 7) < 2) c = randomColor;  // 2 pixels on...   // was color now randomColor
         pixels.setPixelColor(   i, c);   // First eye
         pixels.setPixelColor(70 - i, c); // Second eye (flipped)
-      }
+                                }
       pixels.show();
       offset++;
       delay(90);
       break;
-  }
+   }
 
   t = millis();
   if ((t - prevTime) > 8000) {       // Every 8 seconds...
